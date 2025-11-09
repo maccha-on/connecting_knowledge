@@ -1,3 +1,44 @@
+import './globals.css';
+import type { Metadata } from 'next';
+
+/**
+ * メタデータ設定
+ * ページタイトル・説明文は検索結果やシェア時に使用される
+ */
+export const metadata: Metadata = {
+  title: 'Connecting Knowledge',
+  description: 'AIがファイルの意味付けを行い、知識をつなぐチャットデモアプリ',
+};
+
+/**
+ * 全ページ共通レイアウト
+ * Next.jsのApp Routerでは、<html>と<body>をここで定義する。
+ */
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="ja">
+      <head>
+        {/* 必要ならここにフォントやfaviconを追加 */}
+        <link rel="icon" href="/favicon.ico" />
+      </head>
+      <body className="bg-white text-gray-900 min-h-screen">
+        {/* 子要素（page.tsxなど）がここにレンダリングされる */}
+        {children}
+      </body>
+    </html>
+  );
+}
+
+
+
+
+
+
+{/* 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -32,3 +73,4 @@ export default function RootLayout({
     </html>
   );
 }
+*/}
