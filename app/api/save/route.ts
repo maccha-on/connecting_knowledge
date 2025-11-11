@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { appendEntry } from '@/lib/store';
 
+import { promises as fs } from 'fs';
+import path from 'path';
+
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
 
 /**
  * POST /api/save
@@ -23,11 +27,13 @@ export async function POST(req: NextRequest) {
     // --- JSONファイルへの追記保存 ---
     const saved = await appendEntry({ description, tags, path });
 
-    // --- 成功レスポンス ---
-    return NextResponse.json({ ok: true, saved });
+    // 保存後に public/ にもコピー
+    const src = path.join(process.cwd(), 'data', 'data.json');
+    const dest = path.join(process.cwd(), 'public', 'data.json');
+    await fs.copyFile(src, dest);
 
+    return NextResponse.json({ ok: true, saved });
   } catch (e: any) {
-    console.error(e);
     return NextResponse.json({ error: e?.message || 'save failed' }, { status: 500 });
   }
 }

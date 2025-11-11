@@ -2,7 +2,7 @@ import Chat from '@/components/chat';
 
 export default function Page() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen main-bg">
       <Chat />
     </main>
   );

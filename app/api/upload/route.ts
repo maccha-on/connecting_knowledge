@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
+import os from 'os';
 import { promises as fs } from 'fs';
 import OpenAI from 'openai';
 
@@ -13,9 +14,24 @@ export const dynamic = 'force-dynamic';
  * 存在しない場合のみ作成。
  */
 async function ensureUploadsDir() {
-  const dir = path.join(process.cwd(), 'public', 'uploads');
-  await fs.mkdir(dir, { recursive: true });
-  return dir;
+  // まず開発時やローカル環境で想定される `public/uploads` に作成を試みる
+  const publicDir = path.join(process.cwd(), 'public', 'uploads');
+  try {
+    await fs.mkdir(publicDir, { recursive: true });
+    return publicDir;
+  } catch (err: any) {
+    // サーバレス環境（例: AWS Lambda の /var/task は読み取り専用）では作成に失敗する
+    // その場合は書き込み可能な一時ディレクトリへフォールバックする
+    const tmpDir = path.join(os.tmpdir(), 'uploads');
+    try {
+      await fs.mkdir(tmpDir, { recursive: true });
+      console.warn(`public uploads dir not writable, using tmp dir: ${tmpDir}`);
+      return tmpDir;
+    } catch (e) {
+      // どちらも作れない場合はエラーを投げる
+      throw err;
+    }
+  }
 }
 
 /**
@@ -60,8 +76,11 @@ export async function POST(req: NextRequest) {
       {
         role: 'system' as const,
         content: `あなたは企業内文書の司書AIです。以下のファイル情報から、\\n` +
-          `(1) 詳細な説明（200〜400字）\\n(2) タグ（最大10件、日本語の名詞中心）\\n` +
-          `をJSONで出力してください。フィールドは description, tags のみ。`,
+          `(1) description: この資料がどんなものかの説明（100〜200字）\\n` +
+          `(2) tag:  タグ（最大10件、日本語の名詞中心）\\n` +
+          `をJSONで出力してください。フィールドは description, tags のみ。\\n` +
+          `ファイルが読み取れない場合は、descriptionには「読み取り不可のため、手入力してください。」と記載してください。` +
+          `descriptionの書き出しは「このファイルは...です。」とし、解説以外の文章は含めないでください。`,
       },
       {
         role: 'user' as const,

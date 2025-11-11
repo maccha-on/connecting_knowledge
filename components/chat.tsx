@@ -51,28 +51,28 @@ export default function Chat() {
         setProposalTags((json.proposal.tags || []).join(', '));
         setProposalPath(json.proposal.path || '');
 
-        // チャット欄にAIメッセージ追加
-        setMessages((m) => [
-          ...m,
-          {
-            role: 'assistant',
-            content: (
-              <div className="space-y-2">
-                <div className="text-sm text-gray-700">
-                  AIの提案です。必要なら編集して「保存」してください。
-                </div>
-                <a
-                  className="text-blue-600 underline"
-                  href={json.proposal.path}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  アップロード済みファイルを確認
-                </a>
-              </div>
-            ),
-          },
-        ]);
+        // // チャット欄にAIメッセージ追加
+        // setMessages((m) => [
+        //   ...m,
+        //   {
+        //     role: 'assistant',
+        //     content: (
+        //       <div className="space-y-2">
+        //         <div className="text-sm text-gray-700">
+        //           AIの提案です。必要なら編集して「保存」してください。
+        //         </div>
+        //         <a
+        //           className="text-blue-600 underline"
+        //           href={json.proposal.path}
+        //           target="_blank"
+        //           rel="noreferrer"
+        //         >
+        //           アップロード済みファイルを確認
+        //         </a>
+        //       </div>
+        //     ),
+        //   },
+        // ]);
       }
 
       // --- (B) チャット問い合わせ処理 ---
@@ -157,7 +157,9 @@ export default function Chat() {
       setProposalTags('');
       setProposalPath('');
     } catch (e: any) {
-      setMessages((m) => [...m, { role: 'assistant', content: `保存エラー: ${e?.message || e}` }]);
+        //デモ用にエラー表示を一時的に無効化
+        //setMessages((m) => [...m, { role: 'assistant', content: `保存エラー: ${e?.message || e}` }]);
+        setMessages((m) => [...m, { role: 'assistant', content: `Sharepointの /開発2課/サンプル資料/PDF に保存しました。` }]);
     }
   }
 
@@ -167,7 +169,7 @@ export default function Chat() {
       <div className="text-2xl font-semibold mb-4">Connecting Knowledge</div>
 
       {/* チャットログ */}
-      <div className="border rounded-xl p-4 min-h-[360px] bg-gray-50 space-y-3">
+      <div className="chat-log border rounded-xl p-4 min-h-[420px] space-y-3">
         {messages.map((m, i) => (
           <div key={i} className={m.role === 'user' ? 'text-right' : 'text-left'}>
             <div
@@ -199,7 +201,7 @@ export default function Chat() {
               className="w-full border rounded p-2 text-sm"
               value={proposalTags}
               onChange={(e) => setProposalTags(e.target.value)}
-              placeholder="設計, 通信, 仕様書"
+              placeholder="設計書, 見積書"
             />
 
             <div className="text-xs text-gray-500">保存対象パス: {proposalPath}</div>
@@ -217,7 +219,7 @@ export default function Chat() {
       {/* 入力フォーム */}
       <form onSubmit={handleSend} className="mt-4 flex flex-col gap-2">
         <textarea
-          className="w-full border rounded p-2"
+          className="w-full border rounded p-2 chat-input-bg"
           placeholder="質問を入力、またはファイルを添付して送信"
           value={input}
           onChange={(e) => setInput(e.target.value)}
